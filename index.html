@@ -67,7 +67,7 @@
 		</div>
 	</body>
 	<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+		<div class="modal-dialog modal-xl">
 		  <div class="modal-content">
 			<div class="modal-header">
 			  <h1 class="modal-title fs-5" id="exampleModalLabel">Настройки</h1>
@@ -101,7 +101,7 @@
 					<div class="col-md-7 col-4 col-sm-12 mb-4" style="text-align: center">
 						<div class="row mb-2" id="probe-wrap-test">
 							<div class="col-8">
-								<input type="text" id="testText" class="form-control form-input">
+								<input type="text" id="testText" class="form-control">
 							</div>
 							<div class="col-2 my-auto" style="cursor: pointer">
 								<img src="refresh.svg" onclick="createTestCode()" style="height: 24px">
@@ -215,9 +215,6 @@
 		async function printAll() {
 			const codesWrap = document.getElementById('codes-wrap');
 			const inputs = document.getElementsByClassName('form-input');
-			const scale = document.getElementById('scale').value;
-			const height = document.getElementById('height').value;
-			const codeType = document.getElementById('codeType').value;
 			const printables = [];
 			let validated = true;
 			for (let i = 0; i<inputs.length; i++) {

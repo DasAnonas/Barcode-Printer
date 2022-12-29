@@ -245,11 +245,9 @@
 		}
 
 		function clearAll() {
-			const inputs = document.getElementsByClassName('form-input');
-			const labels = document.getElementsByClassName('error-label');
-			for (let i = 2; i<= count; i++) {
-				document.getElementById('probe-wrap-' + i).remove();
-			}
+			const inputs = document.querySelectorAll('.probe-wrap');
+			console.log(inputs);
+			inputs.forEach(input => input.remove());
 			document.getElementById('number-1').value = '';
 			document.getElementById('error-label-1').innerHTML = '';
 			count = 1;

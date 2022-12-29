@@ -97,6 +97,29 @@
 						<input type="number" id="fontSize" placeholder="Размер текста" class="form-control">
 					</div>
 				</div>
+				<div class="row justify-content-center">
+					<div class="col-md-7 col-4 col-sm-12 mb-4" style="text-align: center">
+						<div class="row mb-2" id="probe-wrap-test">
+							<div class="col-8">
+								<input type="text" id="testText" class="form-control form-input">
+							</div>
+							<div class="col-2 my-auto" style="cursor: pointer">
+								<img src="refresh.svg" onclick="createTestCode()" style="height: 24px">
+							</div>
+							<div class="col-2 my-auto" style="cursor: pointer;">
+								<img src="print.svg" onclick="printTestCode()" style="height: 24px">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row justify-content-center">
+					<div class="col-md-7 col-4 col-sm-12 mb-4" style="text-align: center">
+						<div id="code-wrap-test" style="text-align: center; display: inline-block;">
+							<canvas id="code-test" ></canvas>
+							<h4 id="code-text-test" style="margin: 0;"></h4>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 			  <button type="button" onclick="setSettingsInputs()" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -139,7 +162,6 @@
 			localStorage.setItem('codeType', document.getElementById('codeType').value);
 			localStorage.setItem('codeFontSize', document.getElementById('fontSize').value);
 			readSettings();
-			clearAll();
 		}
 
 		function addCode() {
@@ -149,10 +171,10 @@
 				<div class="col-8">
 					<input type="text" id="number-${count}" class="form-control form-input">
 				</div>
-					<div class="col my-auto" style="cursor: pointer;">
+					<div class="col-1 my-auto" style="cursor: pointer;">
 						<img src="print.svg" onclick="printLine(${count})" style="height: 24px">
 					</div>
-					<div class="col my-auto" style="cursor: pointer">
+					<div class="col-1 my-auto" style="cursor: pointer">
 						<img src="close.svg" onclick="deleteLine(${count})">
 					</div>
 					<div id="error-label-${count}" class="text-danger error-label p-2" style="text-align: start;"></div>
@@ -250,6 +272,27 @@
 			}
 			errorLabel.innerHTML = '';
 			return true;
+		}
+
+		async function createTestCode() {
+			const text = document.getElementById('testText').value;
+			const testScale = document.getElementById('scale').value;
+			const testHeight = document.getElementById('height').value;
+			const testCodeType = document.getElementById('codeType').value;
+			document.getElementById('code-text-test').innerHTML = text;
+			document.getElementById('code-text-test').style.fontSize = document.getElementById('fontSize').value + 'px';
+			const pdfCode = await bwipjs.toCanvas('code-test', {
+        			bcid:        testCodeType,       // Barcode type
+        			text:        text,    // Text to encode
+        			scale:       testScale,               // 3x scaling factor
+        			height:      testHeight,              // Bar height, in millimeters
+    			});
+		}
+
+		async function printTestCode() {
+			const pdf = document.getElementById("code-wrap-test");
+			const img = await domtoimage.toPng(pdf);
+			printJS({printable: img, type: 'image'});
 		}
 
 	</script>

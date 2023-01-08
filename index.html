@@ -184,7 +184,6 @@
 
 		function deleteLine(id) {
 			document.getElementById('probe-wrap-' + id).remove();
-			count --;
 		}
 
 		async function printLine(id) {
@@ -217,27 +216,30 @@
 			const inputs = document.getElementsByClassName('form-input');
 			const printables = [];
 			let validated = true;
-			for (let i = 0; i<inputs.length; i++) {
-				validated = validate(i+1) && validated;
+			for (let i = 0; i<count; i++) {
+				if (document.getElementById('number-' + (i + 1)))
+					validated = validate(i+1) && validated;
 			}
 			if (validated && inputs.length>0) {
-				for (let i = 0; i<inputs.length; i++) {
-					const inputText = document.getElementById('number-' + (i+1)).value;
-					codesWrap.insertAdjacentHTML('beforeend', `
-					<div id="code-wrap-${i + 1}" style="text-align: center; display: inline-block;">
-						<canvas id="code-${i + 1}" ></canvas>
-						<h4 id="code-text-${i + 1}" style="margin: 0; font-size:${fontSize}px">${inputText}</h4>
-					</div>
-				`);
-				const pdfCode = await bwipjs.toCanvas('code-' + (i+1), {
-        			bcid:        codeType,       // Barcode type
-        			text:        inputText,    // Text to encode
-        			scale:       scale,               // 3x scaling factor
-        			height:      height,              // Bar height, in millimeters
-    			});
-				const pdf = document.getElementById("code-wrap-" + (i+1));
-				const img = await domtoimage.toPng(pdf);
-				printables.push(img);
+				for (let i = 0; i<count; i++) {
+					if (document.getElementById('number-' + (i + 1))) {
+						const inputText = document.getElementById('number-' + (i+1)).value;
+						codesWrap.insertAdjacentHTML('beforeend', `
+							<div id="code-wrap-${i + 1}" style="text-align: center; display: inline-block;">
+								<canvas id="code-${i + 1}" ></canvas>
+								<h4 id="code-text-${i + 1}" style="margin: 0; font-size:${fontSize}px">${inputText}</h4>
+							</div>
+						`);
+					const pdfCode = await bwipjs.toCanvas('code-' + (i+1), {
+        				bcid:        codeType,       // Barcode type
+        				text:        inputText,    // Text to encode
+        				scale:       scale,               // 3x scaling factor
+        				height:      height,              // Bar height, in millimeters
+    				});
+					const pdf = document.getElementById("code-wrap-" + (i+1));
+					const img = await domtoimage.toPng(pdf);
+					printables.push(img);
+					}
 				}	
 				printJS({printable: printables, type: 'image', imageStyle: 'width:100%;margin-bottom:10px;'});
 				codesWrap.innerHTML = '';

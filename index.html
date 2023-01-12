@@ -17,6 +17,20 @@
 							<h2>Печать этикеток</h2>
 						</div>
 					</div>
+					<div class="row g-3 mb-3" id="fileWrap">
+						<div class="col-2 my-auto">
+							<label for="formFileLg" class="form-label">Заказ-наряд:</label>
+						</div>
+						<div class="col-6 my-auto">	
+								<input class="form-control form-control-lg" id="orderFile" type="file" accept=".xls,.xlsx" oninput="processFile()">
+						</div>
+					  </div>
+					  <div class="row mb-3">
+						<div class="col-lg-5 col-md-6 col-sm-10">
+							<button type="button" id="showForm" class="btn btn-link" onclick="showForm()">Ввести вручную</button>
+						</div>
+					  </div>
+					  <div id="form" style="display: none">
 					<div class="row justify-content-center">
 						<div class="col-xl-10 col-xxl-7 col-sm-12 mb-4">
 							<h3 class="col-form-label" style="text-align: start">Номер пробы</h3>
@@ -52,6 +66,7 @@
 						<div class="col-md-7 col-4 col-sm-12 mb-2" style="text-align: center">
 							<button onclick="clearAll()" id="clearAll" class="btn btn-danger mb-3">Очистить</button>
 						</div>
+					</div>
 					</div>
 					<div class="row justify-content-center">
 						<div class="col-md-7 col-4 col-sm-12 mb-2" style="text-align: center">
@@ -133,6 +148,7 @@
 	<script src="dom-to-image.min.js"></script>
 	<script src="print.min.js"></script>
 	<script src="bwip-js-min.js"></script>
+	<script src="exceljs.min.js"></script>
 	<script>
 		let count = 1;
 		let scale;
@@ -291,5 +307,82 @@
 			const img = await domtoimage.toPng(pdf);
 			printJS({printable: img, type: 'image'});
 		}
+
+		function FindProbes (probeWorksheet, result) {
+	const probes = [];
+	const col3 = probeWorksheet.getColumn(3);
+	const col4 = probeWorksheet.getColumn(4);
+	if (col3 && col4) {
+		const numbers = col3.values.slice(6, col3.values.length);
+		const weights = col4.values.slice(6, col4.values.length);
+		numbers.forEach((n, i) => probes.push({probeNum: n, wetWeight: weights[i]}));
+	}
+	result.probes = probes;
+}
+
+function FindOtherInfo (anWorksheet, result) {
+	const col1 = anWorksheet.getColumn(1);
+	if (col1) {
+		// let date1 = col1.values[7];
+		// let date2 = col1.values[8];
+		// if (date1) {
+		// 	date1 = date1.richText[1].text;
+		// 	result.receiptDate = date1.replaceAll('.', '/');
+		// }
+		// if (date2) {
+		// 	date2 = date2.richText[1].text;
+		// 	result.receiptDate = date2.replaceAll('.', '/');
+		// }
+		let text = col1.values[14];
+		if (text) {
+			text = text.trim().split(' ');
+			if (text.length > 1)
+				result.order = text[text.length-1];
+		}
+	}
+}
+
+async function getDataFromExcel(data) {
+	const workbook = new ExcelJS.Workbook();
+	const result = {};
+	try {
+		await workbook.xlsx.load(data);
+		const worksheets = workbook.worksheets;
+		const probesFound = worksheets.find(w => w.name === 'Опись проб');
+		if (probesFound)
+			FindProbes(probesFound, result);
+		const anFound = worksheets.find(w => w.name === 'Аналит.');
+		if (anFound)
+			FindOtherInfo(anFound, result);
+		console.log(1);
+	} catch (error) {
+		console.log(error);
+	}
+	return result;
+}
+
+function showForm() {
+	document.getElementById('form').style.display = 'block';
+	document.getElementById('showForm').style.display = 'none';
+	document.getElementById('fileWrap').style.display = 'none';
+}
+
+async function processFile() {
+	const input = document.getElementById('orderFile');
+	const fileData = await input.files[0].arrayBuffer();
+	const data = await getDataFromExcel(fileData);
+	fillForm(data);
+}
+
+function fillForm(data) {
+	const length = 	data.probes.length + count;
+	for (let i=count; i< length; i++) {
+    if(i>1)
+		addCode();
+		console.log(data.probes[i-1])
+		document.getElementById(`number-${i}`).value = data.probes[i-1].probeNum;
+	}
+	showForm()
+}
 
 	</script>
